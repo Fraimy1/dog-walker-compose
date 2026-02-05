@@ -25,6 +25,7 @@ async def init_scheduler(bot: "Bot") -> AsyncScheduler:
     global _scheduler, _bot
     _bot = bot
     _scheduler = AsyncScheduler()
+    await _scheduler.__aenter__()
     await _scheduler.start_in_background()
     logger.debug("Scheduler started in background")
     return _scheduler
@@ -34,7 +35,7 @@ async def stop_scheduler() -> None:
     """Stop the scheduler."""
     global _scheduler
     if _scheduler:
-        await _scheduler.stop()
+        await _scheduler.__aexit__(None, None, None)
         _scheduler = None
         logger.debug("Scheduler stopped")
 

@@ -7,7 +7,7 @@ from loguru import logger
 from src.bot.config import settings
 from src.bot.handlers import router
 from src.bot.scheduler import init_scheduler, stop_scheduler
-from src.database.session import init_db
+from src.database.session import run_migrations
 
 
 def setup_logging() -> None:
@@ -39,9 +39,9 @@ async def main() -> None:
     setup_logging()
     logger.info("Starting bot...")
 
-    # Initialize database
-    await init_db()
-    logger.info("Database initialized")
+    # Run pending database migrations
+    run_migrations()
+    logger.info("Database migrated")
 
     # Create bot and dispatcher
     bot = Bot(token=settings.bot_token)

@@ -37,7 +37,10 @@ def parameter_keyboard(lang: str = "ru") -> ReplyKeyboardMarkup:
                 KeyboardButton(text=get_text("didnt_poop", lang)),
                 KeyboardButton(text=get_text("long_walk", lang)),
             ],
-            [KeyboardButton(text=get_text("send", lang))],
+            [
+                KeyboardButton(text=get_text("send", lang)),
+                KeyboardButton(text=get_text("cancel", lang)),
+            ],
         ],
         resize_keyboard=True,
     )

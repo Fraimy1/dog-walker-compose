@@ -262,6 +262,37 @@ async def send_walk(message: Message, bot: Bot) -> None:
         await _broadcast_walk(session, walk, user)
 
 
+@router.message(F.text.in_({TEXTS["ru"]["cancel"], TEXTS["en"]["cancel"]}))
+async def cancel_walk(message: Message) -> None:
+    """Cancel the current pending walk."""
+    _clear_input_states(message.from_user.id)
+
+    async with async_session() as session:
+        user = await crud.get_user_by_telegram_id(session, message.from_user.id)
+        if user is None:
+            await message.answer("Please /start first")
+            return
+
+        lang = user.language
+        walk = await crud.get_pending_walk(session, user.id)
+
+        if walk is None:
+            await message.answer(
+                text=get_text("no_active_walk", lang),
+                reply_markup=main_keyboard(lang),
+            )
+            return
+
+        await cancel_walk_timer(user.id)
+        await crud.delete_walk(session, walk.id)
+        logger.info(f"User {user.telegram_id} cancelled walk {walk.id}")
+
+        await message.answer(
+            text=get_text("walk_cancelled", lang),
+            reply_markup=main_keyboard(lang),
+        )
+
+
 @router.message(F.text.in_({TEXTS["ru"]["change_name_button"], TEXTS["en"]["change_name_button"]}))
 async def change_name(message: Message) -> None:
     """Handle 'change name' button - enter name-input mode."""
@@ -343,6 +374,10 @@ async def _handle_name_input(message: Message) -> None:
 
         if not name:
             await message.answer(text=get_text("invalid_name", lang))
+            return
+
+        if len(name) > 30 or not re.fullmatch(r"[\w\s]+", name, re.UNICODE):
+            await message.answer(text=get_text("invalid_name_format", lang))
             return
 
         await crud.set_display_name(session, user.id, name)

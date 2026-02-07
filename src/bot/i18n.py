@@ -33,6 +33,9 @@ TEXTS: dict[str, dict[str, str]] = {
         "change_name_prompt": "Текущее имя: {current}\n\nВведите новое имя:",
         "name_set": "Имя изменено на: {name}",
         "invalid_name": "Имя не может быть пустым.",
+        "invalid_name_format": "Имя может содержать только буквы, цифры и пробелы (до 30 символов).",
+        "cancel": "❌ Отмена",
+        "walk_cancelled": "Прогулка отменена.",
     },
     "en": {
         "welcome": "Hello! Choose your language:",
@@ -68,6 +71,9 @@ TEXTS: dict[str, dict[str, str]] = {
         "change_name_prompt": "Current name: {current}\n\nEnter your new name:",
         "name_set": "Name changed to: {name}",
         "invalid_name": "Name can't be empty.",
+        "invalid_name_format": "Name can only contain letters, numbers and spaces (up to 30 characters).",
+        "cancel": "❌ Cancel",
+        "walk_cancelled": "Walk cancelled.",
     },
 }
 

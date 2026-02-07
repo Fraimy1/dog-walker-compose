@@ -114,6 +114,17 @@ async def finalize_walk(session: AsyncSession, walk_id: int) -> Walk | None:
     return walk
 
 
+async def delete_walk(session: AsyncSession, walk_id: int) -> None:
+    """Delete a walk record."""
+    stmt = select(Walk).where(Walk.id == walk_id)
+    result = await session.execute(stmt)
+    walk = result.scalar_one_or_none()
+
+    if walk:
+        await session.delete(walk)
+        await session.commit()
+
+
 async def get_all_active_users(session: AsyncSession) -> list[User]:
     """Get all active users for broadcast."""
     stmt = select(User).where(User.is_active == True)

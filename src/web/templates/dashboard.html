@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Walker Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        :root {
+            --bg-main: #0a0a1a;
+            --bg-card: #1a1a2e;
+            --accent: #e94560;
+            --accent-light: #ff6b81;
+            --text-muted: #8892b0;
+        }
+        body { background: var(--bg-main); margin: 0; padding: 1rem; }
+        h1 { text-align: center; color: var(--accent); margin-bottom: 0.25rem; }
+        .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .filters {
+            display: flex; gap: 1rem; align-items: flex-end; justify-content: center;
+            flex-wrap: wrap; margin-bottom: 1.5rem; padding: 1rem;
+            background: var(--bg-card); border-radius: 12px;
+        }
+        .filters label { margin-bottom: 0; font-size: 0.85rem; color: var(--text-muted); }
+        .filters input, .filters select { margin-bottom: 0; padding: 0.4rem 0.6rem; background: var(--bg-main); border-color: #2a2a4a; }
+        .filters button { margin-bottom: 0; background: var(--accent); border: none; padding: 0.4rem 1.5rem; cursor: pointer; }
+        .filters button:hover { background: var(--accent-light); }
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--bg-card); border-radius: 12px; padding: 1.25rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .card.full-width { grid-column: 1 / -1; }
+        .card h3 { margin-top: 0; font-size: 1rem; color: var(--accent-light); }
+        .no-data { text-align: center; color: var(--text-muted); padding: 2rem 0; font-style: italic; }
+        table { font-size: 0.9rem; }
+        table th { color: var(--accent); border-color: #2a2a4a; }
+        table td { border-color: #2a2a4a; }
+        .rank { color: var(--accent); font-weight: bold; }
+        @media (max-width: 768px) {
+            .grid-dashboard { grid-template-columns: 1fr; }
+            .filters { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Dog Walker Dashboard</h1>
+    <p class="subtitle">Walk tracking statistics and insights</p>
+
+    <div class="filters">
+        <div>
+            <label for="start">From</label>
+            <input type="date" id="start">
+        </div>
+        <div>
+            <label for="end">To</label>
+            <input type="date" id="end">
+        </div>
+        <div>
+            <label for="user">Walker</label>
+            <select id="user">
+                <option value="">All walkers</option>
+                {% for u in users %}
+                <option value="{{ u.id }}">{{ u.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button onclick="applyFilters()">Apply</button>
+        </div>
+    </div>
+
+    <div class="grid-dashboard">
+        <div class="card">
+            <h3>Leaderboard</h3>
+            <div id="leaderboard"></div>
+        </div>
+        <div class="card">
+            <h3>Walks Per Day</h3>
+            <div id="walks-per-day"></div>
+        </div>
+        <div class="card full-width">
+            <h3>Weekly Trends</h3>
+            <div id="weekly-trends"></div>
+        </div>
+        <div class="card">
+            <h3>Poop Stats</h3>
+            <div id="poop-stats"></div>
+        </div>
+        <div class="card">
+            <h3>Long Walk %</h3>
+            <div id="long-walk-stats"></div>
+        </div>
+        <div class="card full-width">
+            <h3>Walk Times (Hourly Distribution)</h3>
+            <div id="hourly-dist"></div>
+        </div>
+    </div>
+
+<script>
+const chartTheme = { mode: 'dark', palette: 'palette4' };
+const chartColors = ['#e94560', '#ff6b81', '#6c5ce7', '#a29bfe', '#00cec9', '#81ecec', '#fdcb6e', '#fab1a0'];
+let charts = {};
+
+function destroyCharts() {
+    Object.values(charts).forEach(c => { try { c.destroy(); } catch(e) {} });
+    charts = {};
+}
+
+function noData(el) {
+    document.getElementById(el).innerHTML = '<div class="no-data">No data for selected period</div>';
+}
+
+function setDefaults() {
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(start.getDate() - 13);
+    document.getElementById('start').value = start.toISOString().split('T')[0];
+    document.getElementById('end').value = today.toISOString().split('T')[0];
+}
+
+async function fetchData() {
+    const start = document.getElementById('start').value;
+    const end = document.getElementById('end').value;
+    const userId = document.getElementById('user').value;
+    const params = new URLSearchParams();
+    if (start) params.set('start', start);
+    if (end) params.set('end', end);
+    if (userId) params.set('user_id', userId);
+    const resp = await fetch('/api/dashboard?' + params.toString());
+    return await resp.json();
+}
+
+function renderLeaderboard(data) {
+    const el = document.getElementById('leaderboard');
+    if (!data.length) { noData('leaderboard'); return; }
+    let html = '<table><thead><tr><th>#</th><th>Walker</th><th>Walks</th></tr></thead><tbody>';
+    data.forEach((r, i) => {
+        html += `<tr><td class="rank">${i + 1}</td><td>${r.name}</td><td>${r.walk_count}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+}
+
+function renderWalksPerDay(data) {
+    if (!data.length) { noData('walks-per-day'); return; }
+    charts.walksPerDay = new ApexCharts(document.getElementById('walks-per-day'), {
+        chart: { type: 'bar', height: 300, background: 'transparent', foreColor: '#ccc' },
+        theme: chartTheme,
+        series: [{ name: 'Walks', data: data.map(d => d.count) }],
+        xaxis: { categories: data.map(d => d.day), labels: { rotate: -45, style: { fontSize: '10px' } } },
+        colors: [chartColors[0]],
+        plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
+        dataLabels: { enabled: false },
+        grid: { borderColor: '#2a2a4a' },
+        tooltip: { theme: 'dark' }
+    });
+    charts.walksPerDay.render();
+}
+
+function renderWeeklyTrends(data) {
+    if (!data.length) { noData('weekly-trends'); return; }
+    charts.weeklyTrends = new ApexCharts(document.getElementById('weekly-trends'), {
+        chart: { type: 'area', height: 280, background: 'transparent', foreColor: '#ccc' },
+        theme: chartTheme,
+        series: [{ name: 'Walks', data: data.map(d => d.count) }],
+        xaxis: { categories: data.map(d => d.week_start) },
+        colors: [chartColors[2]],
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.1 } },
+        stroke: { curve: 'smooth', width: 3 },
+        dataLabels: { enabled: false },
+        grid: { borderColor: '#2a2a4a' },
+        tooltip: { theme: 'dark' }
+    });
+    charts.weeklyTrends.render();
+}
+
+function renderPoopStats(data) {
+    if (!data.length) { noData('poop-stats'); return; }
+    const totalWalks = data.reduce((s, d) => s + d.total, 0);
+    const totalDidntPoop = data.reduce((s, d) => s + d.didnt_poop_count, 0);
+    const pooped = totalWalks - totalDidntPoop;
+    charts.poopStats = new ApexCharts(document.getElementById('poop-stats'), {
+        chart: { type: 'donut', height: 300, background: 'transparent', foreColor: '#ccc' },
+        theme: chartTheme,
+        series: [pooped, totalDidntPoop],
+        labels: ['Pooped', "Didn't poop"],
+        colors: [chartColors[4], chartColors[0]],
+        legend: { position: 'bottom' },
+        plotOptions: { pie: { donut: { labels: { show: true, total: { show: true, label: 'Total', color: '#ccc' } } } } },
+        dataLabels: { style: { fontSize: '14px' } },
+        tooltip: { theme: 'dark' }
+    });
+    charts.poopStats.render();
+}
+
+function renderLongWalkStats(data) {
+    if (!data.length) { noData('long-walk-stats'); return; }
+    const names = data.map(d => d.name);
+    const pcts = data.map(d => d.total > 0 ? Math.round((d.long_walk_count / d.total) * 100) : 0);
+    charts.longWalks = new ApexCharts(document.getElementById('long-walk-stats'), {
+        chart: { type: 'radialBar', height: 300, background: 'transparent', foreColor: '#ccc' },
+        theme: chartTheme,
+        series: pcts,
+        labels: names,
+        colors: chartColors.slice(0, names.length),
+        plotOptions: {
+            radialBar: {
+                hollow: { size: '35%' },
+                dataLabels: {
+                    name: { fontSize: '14px', color: '#ccc' },
+                    value: { fontSize: '18px', color: '#fff', formatter: v => v + '%' }
+                },
+                track: { background: '#2a2a4a' }
+            }
+        },
+        legend: { show: true, position: 'bottom', labels: { colors: '#ccc' } }
+    });
+    charts.longWalks.render();
+}
+
+function renderHourlyDist(data) {
+    if (!data.length) { noData('hourly-dist'); return; }
+    const hours = Array.from({ length: 24 }, (_, i) => i);
+    const counts = hours.map(h => {
+        const found = data.find(d => d.hour === h);
+        return found ? found.count : 0;
+    });
+    const labels = hours.map(h => h.toString().padStart(2, '0') + ':00');
+    charts.hourly = new ApexCharts(document.getElementById('hourly-dist'), {
+        chart: { type: 'bar', height: 280, background: 'transparent', foreColor: '#ccc' },
+        theme: chartTheme,
+        series: [{ name: 'Walks', data: counts }],
+        xaxis: { categories: labels, labels: { rotate: -45, style: { fontSize: '10px' } } },
+        colors: [chartColors[3]],
+        plotOptions: { bar: { borderRadius: 3, columnWidth: '55%' } },
+        dataLabels: { enabled: false },
+        grid: { borderColor: '#2a2a4a' },
+        tooltip: { theme: 'dark' }
+    });
+    charts.hourly.render();
+}
+
+async function applyFilters() {
+    destroyCharts();
+    document.querySelectorAll('.card div[id]').forEach(el => { el.innerHTML = ''; });
+    const data = await fetchData();
+    renderLeaderboard(data.leaderboard);
+    renderWalksPerDay(data.walks_per_day);
+    renderWeeklyTrends(data.weekly_trends);
+    renderPoopStats(data.poop_stats);
+    renderLongWalkStats(data.long_walk_stats);
+    renderHourlyDist(data.hourly_distribution);
+}
+
+setDefaults();
+applyFilters();
+</script>
+</body>
+</html>

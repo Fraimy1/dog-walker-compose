@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from src.bot.config import settings
 
-_SYNC_URL = settings.database_url.replace("+aiosqlite", "")
+_SYNC_URL = settings.database_url.replace("+aiomysql", "+pymysql")
 _ALEMBIC_INI = str(Path(__file__).resolve().parents[2] / "alembic.ini")
 
-engine = create_async_engine(settings.database_url, echo=False)
+engine = create_async_engine(settings.database_url, echo=False, pool_pre_ping=True)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
@@ -26,12 +26,14 @@ def run_migrations() -> None:
 
     with sync_engine.connect() as conn:
         has_alembic = conn.execute(
-            text("SELECT name FROM sqlite_master WHERE type='table' AND name='alembic_version'")
+            text("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
+                 "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'alembic_version'")
         ).scalar_one_or_none()
 
         if not has_alembic:
             has_users = conn.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+                text("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
+                     "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'")
             ).scalar_one_or_none()
 
             if has_users:

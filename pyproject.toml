@@ -6,12 +6,13 @@ requires-python = ">=3.10"
 dependencies = [
     "aiogram>=3.0",
     "sqlalchemy>=2.0",
-    "aiosqlite",
     "pydantic-settings",
     "apscheduler>=4.0.0a5",
     "loguru>=0.7.3",
     "alembic>=1.18.3",
     "fastapi>=0.128.4",
+    "aiomysql>=0.3.2",
+    "cryptography>=46.0.4",
 ]
 
 [build-system]

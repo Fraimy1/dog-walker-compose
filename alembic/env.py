@@ -5,7 +5,7 @@ from src.bot.config import settings
 from src.database.models import Base
 
 # Alembic runs synchronously — strip the async driver from the URL
-_SYNC_URL = settings.database_url.replace("+aiosqlite", "")
+_SYNC_URL = settings.database_url.replace("+aiomysql", "+pymysql")
 
 target_metadata = Base.metadata
 

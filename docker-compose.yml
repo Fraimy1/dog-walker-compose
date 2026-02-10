@@ -33,5 +33,12 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
 
+  adminer:
+    image: adminer
+    ports:
+      - "0.0.0.0:8080:8080"
+    depends_on:
+      - mysql
+
 volumes:
   mysql-data:

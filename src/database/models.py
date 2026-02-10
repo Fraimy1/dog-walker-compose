@@ -17,7 +17,7 @@ class User(Base):
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     language: Mapped[str] = mapped_column(String(2), default="ru")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     walks: Mapped[list["Walk"]] = relationship("Walk", back_populates="user")
 
@@ -27,7 +27,7 @@ class Walk(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    walked_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    walked_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     didnt_poop: Mapped[bool] = mapped_column(Boolean, default=False)
     long_walk: Mapped[bool] = mapped_column(Boolean, default=False)
     is_finalized: Mapped[bool] = mapped_column(Boolean, default=False)

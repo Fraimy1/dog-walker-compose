@@ -1,5 +1,6 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 
+from src.bot.config import settings
 from src.bot.i18n import get_text
 
 
@@ -19,14 +20,19 @@ def language_keyboard() -> ReplyKeyboardMarkup:
 
 def main_keyboard(lang: str = "ru") -> ReplyKeyboardMarkup:
     """Main keyboard with walk buttons."""
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text=get_text("walk_button", lang))],
-            [KeyboardButton(text=get_text("walk_at_time_button", lang))],
-            [KeyboardButton(text=get_text("change_name_button", lang))],
-        ],
-        resize_keyboard=True,
-    )
+    rows = [
+        [KeyboardButton(text=get_text("walk_button", lang))],
+        [KeyboardButton(text=get_text("walk_at_time_button", lang))],
+        [KeyboardButton(text=get_text("change_name_button", lang))],
+    ]
+    if settings.webapp_url:
+        rows.append([
+            KeyboardButton(
+                text=get_text("stats_button", lang),
+                web_app=WebAppInfo(url=settings.webapp_url),
+            )
+        ])
+    return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
 
 
 def parameter_keyboard(lang: str = "ru") -> ReplyKeyboardMarkup:

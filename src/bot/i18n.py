@@ -36,6 +36,7 @@ TEXTS: dict[str, dict[str, str]] = {
         "invalid_name_format": "Имя может содержать только буквы, цифры и пробелы (до 30 символов).",
         "cancel": "❌ Отмена",
         "walk_cancelled": "Прогулка отменена.",
+        "stats_button": "📊 Статистика",
     },
     "en": {
         "welcome": "Hello! Choose your language:",
@@ -74,6 +75,7 @@ TEXTS: dict[str, dict[str, str]] = {
         "invalid_name_format": "Name can only contain letters, numbers and spaces (up to 30 characters).",
         "cancel": "❌ Cancel",
         "walk_cancelled": "Walk cancelled.",
+        "stats_button": "📊 Statistics",
     },
 }
 

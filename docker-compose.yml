@@ -52,7 +52,7 @@ services:
       - -c
       - |
         rm -f /shared/tunnel_url
-        cloudflared tunnel --protocol http2 --url http://web:8000 2>&1 | while IFS= read -r line; do
+        cloudflared tunnel --protocol http2 --ha-connections 4 --url http://web:8000 2>&1 | while IFS= read -r line; do
           printf '%s\n' "$$line"
           case "$$line" in
             *https://*.trycloudflare.com*)

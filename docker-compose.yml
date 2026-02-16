@@ -7,19 +7,14 @@ services:
       - BOT_TOKEN=${BOT_TOKEN}
       - ALLOWED_USERS=${ALLOWED_USERS}
       - TZ=Europe/Moscow
-    volumes:
-      - tunnel-data:/shared
     depends_on:
       - mysql
-      - tunnel
     restart: unless-stopped
 
   web:
     build: { dockerfile: Dockerfile.web }
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - BOT_TOKEN=${BOT_TOKEN}
-      - ALLOWED_USERS=${ALLOWED_USERS}
       - TZ=Europe/Moscow
     working_dir: /app
     ports:
@@ -38,36 +33,5 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
 
-  adminer:
-    image: adminer
-    ports:
-      - "0.0.0.0:8080:8080"
-    depends_on:
-      - mysql
-
-  tunnel:
-    build: { dockerfile: Dockerfile.tunnel }
-    entrypoint: /bin/sh
-    command:
-      - -c
-      - |
-        rm -f /shared/tunnel_url
-        cloudflared tunnel --protocol http2 --ha-connections 4 --url http://web:8000 2>&1 | while IFS= read -r line; do
-          printf '%s\n' "$$line"
-          case "$$line" in
-            *https://*.trycloudflare.com*)
-              url=$${line#*https://}
-              url=https://$${url%% *}
-              printf '%s' "$$url" > /shared/tunnel_url
-              ;;
-          esac
-        done
-    volumes:
-      - tunnel-data:/shared
-    restart: unless-stopped
-    depends_on:
-      - web
-
 volumes:
   mysql-data:
-  tunnel-data:

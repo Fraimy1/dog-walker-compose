@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dog Walker Dashboard</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -292,11 +291,6 @@
     </div>
 
 <script>
-// Telegram WebApp integration
-const tg = window.Telegram && window.Telegram.WebApp;
-if (tg) { tg.ready(); tg.expand(); }
-const initData = tg ? tg.initData : '';
-
 const chartColors = ['#7c3aed', '#f43f5e', '#06b6d4', '#f59e0b', '#a78bfa', '#fb7185', '#22d3ee', '#fbbf24'];
 let charts = {};
 
@@ -360,9 +354,7 @@ async function fetchData() {
     if (start) params.set('start', start);
     if (end) params.set('end', end);
     if (userId) params.set('user_id', userId);
-    const headers = {};
-    if (initData) headers['X-Telegram-Init-Data'] = initData;
-    const resp = await fetch('/api/dashboard?' + params.toString(), { headers });
+    const resp = await fetch('/api/dashboard?' + params.toString());
     return await resp.json();
 }
 

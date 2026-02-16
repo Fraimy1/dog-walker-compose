@@ -1,6 +1,5 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
-from src.bot.config import settings
 from src.bot.i18n import get_text
 
 
@@ -25,13 +24,6 @@ def main_keyboard(lang: str = "ru") -> ReplyKeyboardMarkup:
         [KeyboardButton(text=get_text("walk_at_time_button", lang))],
         [KeyboardButton(text=get_text("change_name_button", lang))],
     ]
-    if settings.webapp_url:
-        rows.append([
-            KeyboardButton(
-                text=get_text("stats_button", lang),
-                web_app=WebAppInfo(url=settings.webapp_url),
-            )
-        ])
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
 
 

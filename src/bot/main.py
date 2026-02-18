@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import MenuButtonWebApp, WebAppInfo
 from loguru import logger
 
@@ -69,9 +70,11 @@ async def main() -> None:
     run_migrations()
     logger.info("Database migrated")
 
-    # Create bot and dispatcher
+    # Create bot and dispatcher with FSM storage
+    # MemoryStorage is sufficient for a small private bot; swap to RedisStorage
+    # for multi-process or persistence-across-restart requirements.
     bot = Bot(token=settings.bot_token)
-    dp = Dispatcher()
+    dp = Dispatcher(storage=MemoryStorage())
     dp.update.outer_middleware(WhitelistMiddleware())
     dp.include_router(router)
 

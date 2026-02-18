@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 from apscheduler import AsyncScheduler
@@ -51,7 +51,7 @@ async def schedule_walk_finalization(user_id: int, walk_id: int) -> None:
     # Cancel existing job for this user if any
     await cancel_walk_timer(user_id)
 
-    run_time = datetime.now() + timedelta(minutes=WALK_TIMEOUT_MINUTES)
+    run_time = datetime.now(timezone.utc) + timedelta(minutes=WALK_TIMEOUT_MINUTES)
     job_id = await _scheduler.add_schedule(
         _auto_finalize_walk,
         trigger=DateTrigger(run_time=run_time),
@@ -89,6 +89,8 @@ async def _auto_finalize_walk(user_id: int, walk_id: int) -> None:
         logger.error("Bot not available for auto-finalization")
         return
 
+    from src.bot.notifications import broadcast_walk
+
     async with async_session() as session:
         walk = await crud.finalize_walk(session, walk_id)
         if walk is None:
@@ -106,7 +108,6 @@ async def _auto_finalize_walk(user_id: int, walk_id: int) -> None:
             text=get_text("walk_sent", user.language),
         )
 
-        # Import here to avoid circular import
         from src.bot.keyboards import main_keyboard
 
         await _bot.send_message(
@@ -116,44 +117,4 @@ async def _auto_finalize_walk(user_id: int, walk_id: int) -> None:
         )
 
         # Broadcast to all users
-        await _broadcast_walk(session, walk, user)
-
-
-async def _broadcast_walk(session, walk, walker_user) -> None:
-    """Broadcast walk notification to all active users."""
-    global _bot
-
-    if _bot is None:
-        logger.error("Bot not available for broadcast")
-        return
-
-    all_users = await crud.get_all_active_users(session)
-    logger.info(f"Broadcasting walk {walk.id} to {len(all_users)} users")
-
-    for user in all_users:
-        # Build message in user's language
-        username = walker_user.display_name or walker_user.username or f"User {walker_user.telegram_id}"
-        time_now = datetime.now().strftime("%H:%M")
-        time_walked = walk.walked_at.strftime("%H:%M")
-
-        message = get_text("walk_logged", user.language).format(
-            username=username, time=time_now, time_walked=time_walked
-        )
-
-        # Add parameters if any
-        params = []
-        if walk.didnt_poop:
-            params.append(get_text("param_didnt_poop", user.language))
-        if walk.long_walk:
-            params.append(get_text("param_long_walk", user.language))
-
-        if params:
-            message += "\n" + get_text("additional", user.language).format(
-                params=", ".join(params)
-            )
-
-        try:
-            await _bot.send_message(chat_id=user.telegram_id, text=message)
-            logger.debug(f"Sent walk notification to user {user.telegram_id}")
-        except Exception as e:
-            logger.warning(f"Failed to send notification to user {user.telegram_id}: {e}")
+        await broadcast_walk(session, walk, user, _bot)

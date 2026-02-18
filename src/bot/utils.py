@@ -1,12 +1,13 @@
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 def parse_time(text: str) -> datetime | None:
-    """Parse flexible time input into the closest past datetime.
+    """Parse flexible time input into the closest past datetime (naive UTC).
 
     Supports: 14:30, 2 PM, 2:00AM, 02:00 AM, 11:23PM, 23:23, 11:23, 23
     If no AM/PM is given the result is rolled back to yesterday when needed.
+    Returns a naive UTC datetime for consistent DB storage.
     """
     m = re.match(r"^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$", text.strip().lower())
     if not m:
@@ -30,7 +31,7 @@ def parse_time(text: str) -> datetime | None:
     if minute > 59:
         return None
 
-    now = datetime.now()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
     if target > now:

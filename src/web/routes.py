@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import parse_qs, unquote
 
 from fastapi import APIRouter, Header, Query, Request
@@ -103,7 +103,7 @@ async def dashboard_api(
     if error:
         return error
 
-    today = datetime.now().date()
+    today = datetime.now(timezone.utc).date()
     if start:
         start_dt = datetime.strptime(start, "%Y-%m-%d")
     else:

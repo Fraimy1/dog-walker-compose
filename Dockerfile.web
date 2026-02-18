@@ -14,10 +14,10 @@ RUN pip install --no-cache-dir -r requirements-web.txt
 # ========================================
 # Stage 2: Production — minimal runtime
 # ========================================
-FROM python:3.12-alpine AS production
+FROM python:3.12-slim AS production
 
 # Non-root user
-RUN adduser -D -u 1000 appuser
+RUN useradd -r -u 1000 -m appuser
 
 WORKDIR /app
 

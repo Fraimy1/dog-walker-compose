@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import logging
 from datetime import datetime, timedelta, timezone
 from urllib.parse import parse_qs, unquote
 
@@ -19,6 +20,8 @@ from src.web.queries import (
     get_walks_per_day,
     get_weekly_trends,
 )
+
+logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory="src/web/templates")
 router = APIRouter()
@@ -87,9 +90,13 @@ def check_access(init_data: str | None) -> JSONResponse | None:
 async def dashboard(request: Request):
     # Page HTML loads without auth — the JS SDK provides initData client-side,
     # which is then sent as a header on all API calls for verification.
-    async with async_session() as session:
-        users = await get_all_users(session)
-    return templates.TemplateResponse("dashboard.html", {"request": request, "users": users})
+    try:
+        async with async_session() as session:
+            users = await get_all_users(session)
+        return templates.TemplateResponse("dashboard.html", {"request": request, "users": users})
+    except Exception:
+        logger.exception("Failed to load dashboard page")
+        return HTMLResponse("Service temporarily unavailable", status_code=503)
 
 
 @router.get("/api/dashboard")
@@ -113,12 +120,16 @@ async def dashboard_api(
     else:
         end_dt = datetime.combine(today, datetime.max.time())
 
-    async with async_session() as session:
-        return {
-            "leaderboard": await get_leaderboard(session, start_dt, end_dt, user_id),
-            "walks_per_day": await get_walks_per_day(session, start_dt, end_dt, user_id),
-            "weekly_trends": await get_weekly_trends(session, start_dt, end_dt, user_id),
-            "poop_stats": await get_poop_stats(session, start_dt, end_dt, user_id),
-            "long_walk_stats": await get_long_walk_stats(session, start_dt, end_dt, user_id),
-            "hourly_distribution": await get_hourly_distribution(session, start_dt, end_dt, user_id),
-        }
+    try:
+        async with async_session() as session:
+            return {
+                "leaderboard": await get_leaderboard(session, start_dt, end_dt, user_id),
+                "walks_per_day": await get_walks_per_day(session, start_dt, end_dt, user_id),
+                "weekly_trends": await get_weekly_trends(session, start_dt, end_dt, user_id),
+                "poop_stats": await get_poop_stats(session, start_dt, end_dt, user_id),
+                "long_walk_stats": await get_long_walk_stats(session, start_dt, end_dt, user_id),
+                "hourly_distribution": await get_hourly_distribution(session, start_dt, end_dt, user_id),
+            }
+    except Exception:
+        logger.exception("Failed to fetch dashboard data")
+        return JSONResponse({"error": "Service temporarily unavailable"}, status_code=503)

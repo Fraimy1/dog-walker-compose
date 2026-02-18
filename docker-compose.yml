@@ -31,6 +31,13 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     networks:
       - backend
       - frontend
@@ -75,7 +82,8 @@ services:
       - tunnel-data:/shared
     restart: unless-stopped
     depends_on:
-      - web
+      web:
+        condition: service_healthy
     networks:
       - backend
       - frontend

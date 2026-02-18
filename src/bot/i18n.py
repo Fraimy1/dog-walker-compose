@@ -37,6 +37,12 @@ TEXTS: dict[str, dict[str, str]] = {
         "cancel": "❌ Отмена",
         "walk_cancelled": "Прогулка отменена.",
         "stats_button": "📊 Статистика",
+        "ask_walk_button": "🙏 Попросить выгулять",
+        "ask_walk_choose": "Кому отправить запрос на прогулку?",
+        "ask_walk_all": "👥 Всем",
+        "ask_walk_request": "🐕 {requester} просит выгулять собаку!",
+        "ask_walk_sent": "Запрос отправлен!",
+        "ask_walk_no_users": "Нет других активных пользователей.",
     },
     "en": {
         "welcome": "Hello! Choose your language:",
@@ -76,6 +82,12 @@ TEXTS: dict[str, dict[str, str]] = {
         "cancel": "❌ Cancel",
         "walk_cancelled": "Walk cancelled.",
         "stats_button": "📊 Statistics",
+        "ask_walk_button": "🙏 Ask to walk",
+        "ask_walk_choose": "Who should walk the dog?",
+        "ask_walk_all": "👥 Everyone",
+        "ask_walk_request": "🐕 {requester} wants someone to walk the dog!",
+        "ask_walk_sent": "Request sent!",
+        "ask_walk_no_users": "No other active users.",
     },
 }
 

@@ -1,18 +1,19 @@
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from aiogram import Bot, F, Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
 from src.bot.i18n import TEXTS, get_text
-from src.bot.keyboards import language_keyboard, main_keyboard, parameter_keyboard
+from src.bot.keyboards import ask_walk_keyboard, language_keyboard, main_keyboard, parameter_keyboard
 from src.bot.scheduler import (
     _broadcast_walk,
     cancel_walk_timer,
     schedule_walk_finalization,
 )
+from src.bot.utils import parse_time as _parse_time
 from src.database import crud
 from src.database.session import async_session
 
@@ -28,42 +29,6 @@ def _clear_input_states(user_id: int) -> None:
     _awaiting_time.discard(user_id)
     _awaiting_name.discard(user_id)
 
-
-def _parse_time(text: str) -> datetime | None:
-    """Parse flexible time input into the closest past datetime.
-
-    Supports: 14:30, 2 PM, 2:00AM, 02:00 AM, 11:23PM, 23:23, 11:23, 23
-    If no AM/PM is given the result is rolled back to yesterday when needed.
-    """
-    m = re.match(r"^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$", text.strip().lower())
-    if not m:
-        return None
-
-    hour = int(m.group(1))
-    minute = int(m.group(2)) if m.group(2) else 0
-    period = m.group(3)
-
-    if period:
-        if hour < 1 or hour > 12:
-            return None
-        if period == "am":
-            hour = 0 if hour == 12 else hour
-        else:
-            hour = hour if hour == 12 else hour + 12
-    else:
-        if hour > 23:
-            return None
-
-    if minute > 59:
-        return None
-
-    now = datetime.now()
-    target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
-
-    if target > now:
-        target -= timedelta(days=1)
-
-    return target
 
 
 @router.message(Command("start"))
@@ -310,6 +275,64 @@ async def change_name(message: Message) -> None:
     _awaiting_name.add(message.from_user.id)
     logger.info(f"User {message.from_user.id} entered name-input mode")
     await message.answer(text=get_text("change_name_prompt", lang).format(current=current))
+
+
+@router.message(F.text.in_({TEXTS["ru"]["ask_walk_button"], TEXTS["en"]["ask_walk_button"]}))
+async def ask_walk(message: Message) -> None:
+    """Show inline keyboard for selecting walk request recipient."""
+    _clear_input_states(message.from_user.id)
+
+    async with async_session() as session:
+        user = await crud.get_user_by_telegram_id(session, message.from_user.id)
+        if user is None:
+            await message.answer("Please /start first")
+            return
+
+        lang = user.language
+        users = await crud.get_all_active_users(session)
+
+    await message.answer(
+        text=get_text("ask_walk_choose", lang),
+        reply_markup=ask_walk_keyboard(users, lang),
+    )
+
+
+@router.callback_query(F.data.startswith("ask_walk:"))
+async def ask_walk_callback(callback: CallbackQuery, bot: Bot) -> None:
+    """Send walk request to selected user(s)."""
+    target = callback.data.split(":", 1)[1]
+
+    async with async_session() as session:
+        requester = await crud.get_user_by_telegram_id(session, callback.from_user.id)
+        if requester is None:
+            await callback.answer("Please /start first")
+            return
+
+        lang = requester.language
+        requester_name = (
+            requester.display_name or requester.username or f"User {requester.telegram_id}"
+        )
+
+        if target == "all":
+            recipients = await crud.get_all_active_users(session)
+        else:
+            target_user = await crud.get_user_by_telegram_id(session, int(target))
+            recipients = [target_user] if target_user else []
+
+    request_text = get_text("ask_walk_request", "ru").format(requester=requester_name)
+    sent = 0
+    for recipient in recipients:
+        msg = get_text("ask_walk_request", recipient.language).format(requester=requester_name)
+        try:
+            await bot.send_message(chat_id=recipient.telegram_id, text=msg)
+            sent += 1
+        except Exception as e:
+            logger.warning(f"Failed to send walk request to {recipient.telegram_id}: {e}")
+
+    logger.info(f"User {callback.from_user.id} sent walk request to {target!r} ({sent} delivered)")
+    await callback.answer(get_text("ask_walk_sent", lang))
+    # Remove inline keyboard after selection
+    await callback.message.edit_reply_markup(reply_markup=None)
 
 
 # --- catch-all: MUST be registered after every other handler ---

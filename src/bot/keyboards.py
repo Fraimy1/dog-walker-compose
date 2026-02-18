@@ -1,4 +1,4 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 
 from src.bot.config import settings
 from src.bot.i18n import get_text
@@ -23,6 +23,7 @@ def main_keyboard(lang: str = "ru") -> ReplyKeyboardMarkup:
     rows = [
         [KeyboardButton(text=get_text("walk_button", lang))],
         [KeyboardButton(text=get_text("walk_at_time_button", lang))],
+        [KeyboardButton(text=get_text("ask_walk_button", lang))],
         [KeyboardButton(text=get_text("change_name_button", lang))],
     ]
     if settings.webapp_url:
@@ -33,6 +34,19 @@ def main_keyboard(lang: str = "ru") -> ReplyKeyboardMarkup:
             )
         ])
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
+
+
+def ask_walk_keyboard(users: list, lang: str = "ru") -> InlineKeyboardMarkup:
+    """Inline keyboard for selecting who receives the walk request."""
+    buttons = [
+        [InlineKeyboardButton(text=get_text("ask_walk_all", lang), callback_data="ask_walk:all")]
+    ]
+    for user in users:
+        name = user.display_name or user.username or f"User {user.telegram_id}"
+        buttons.append([
+            InlineKeyboardButton(text=name, callback_data=f"ask_walk:{user.telegram_id}")
+        ])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
 def parameter_keyboard(lang: str = "ru") -> ReplyKeyboardMarkup:

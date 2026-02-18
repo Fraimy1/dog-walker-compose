@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     allowed_users: list[int] = []
     webapp_url: str = ""
 
-    model_config = {"env_file": ".env"}
+    model_config = {"env_file": ".env", "extra": "ignore"}
 
 
 settings = Settings()

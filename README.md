@@ -8,6 +8,7 @@
 ## English
 
 A private Telegram bot for a small group to log and track dog walks. When someone walks the dog, everyone in the group gets notified. Includes a web dashboard with walk statistics and charts.
+A private Telegram bot for a small group to log and track dog walks. When someone walks the dog, everyone in the group gets notified. Includes a web dashboard with walk statistics and charts.
 
 ### Features
 
@@ -54,8 +55,17 @@ A private Telegram bot for a small group to log and track dog walks. When someon
 ### Quick Start
 
 #### 1. Clone and configure
+#### 1. Clone and configure
 
 ```bash
+git clone https://github.com/Fraimy1/dog-walker-compose.git
+cd dog-walker-compose
+cp .env.example .env
+```
+
+Edit `.env` with your values (see [Configuration](#configuration) below).
+
+#### 2. Start
 git clone https://github.com/Fraimy1/dog-walker-compose.git
 cd dog-walker-compose
 cp .env.example .env
@@ -75,11 +85,28 @@ Dashboard is available at `http://localhost:8000`.
 
 ```bash
 docker compose --profile dev up -d
+docker compose up -d
+```
+
+Dashboard is available at `http://localhost:8000`.
+
+#### 3. Start with dev tools (Adminer DB UI at port 8080)
+
+```bash
+docker compose --profile dev up -d
 ```
 
 #### 4. Stop
+#### 4. Stop
 
 ```bash
+docker compose down
+```
+
+To also delete the database volume:
+
+```bash
+docker compose down -v
 docker compose down
 ```
 
@@ -117,12 +144,16 @@ DATABASE_URL=mysql+aiomysql://dogwalker:secret123@mysql:3306/dogwalker
 #### Getting Telegram user IDs
 
 Message [@userinfobot](https://t.me/userinfobot) on Telegram — it replies with your numeric ID.
+Message [@userinfobot](https://t.me/userinfobot) on Telegram — it replies with your numeric ID.
 
 ### How It Works
 
 1. `/start` — choose language (Russian or English)
 2. Press **Walk the dog** — starts a new walk with a 5-minute timer
+1. `/start` — choose language (Russian or English)
+2. Press **Walk the dog** — starts a new walk with a 5-minute timer
 3. Optionally toggle **Didn't poop** / **Long walk**
+4. Press **Send** (or wait for auto-send) — walk is logged and broadcast to all users
 4. Press **Send** (or wait for auto-send) — walk is logged and broadcast to all users
 5. To log a past walk, press **Log walk at time** and type the time (e.g. `14:30`, `2 PM`)
 
@@ -143,6 +174,7 @@ Message [@userinfobot](https://t.me/userinfobot) on Telegram — it replies with
 
 ## Русский
 
+Приватный Telegram-бот для небольшой группы, позволяющий отмечать и отслеживать прогулки с собакой. Когда кто-то выгуливает собаку, все участники получают уведомление. Включает веб-дашборд со статистикой.
 Приватный Telegram-бот для небольшой группы, позволяющий отмечать и отслеживать прогулки с собакой. Когда кто-то выгуливает собаку, все участники получают уведомление. Включает веб-дашборд со статистикой.
 
 ### Возможности
@@ -190,8 +222,17 @@ Message [@userinfobot](https://t.me/userinfobot) on Telegram — it replies with
 ### Быстрый старт
 
 #### 1. Клонировать и настроить
+#### 1. Клонировать и настроить
 
 ```bash
+git clone https://github.com/Fraimy1/dog-walker-compose.git
+cd dog-walker-compose
+cp .env.example .env
+```
+
+Отредактируйте `.env` (см. раздел [Конфигурация](#конфигурация)).
+
+#### 2. Запустить
 git clone https://github.com/Fraimy1/dog-walker-compose.git
 cd dog-walker-compose
 cp .env.example .env
@@ -211,11 +252,28 @@ docker compose up -d
 
 ```bash
 docker compose --profile dev up -d
+docker compose up -d
+```
+
+Дашборд доступен на `http://localhost:8000`.
+
+#### 3. Запуск с инструментами разработки (Adminer на порту 8080)
+
+```bash
+docker compose --profile dev up -d
 ```
 
 #### 4. Остановить
+#### 4. Остановить
 
 ```bash
+docker compose down
+```
+
+Остановить и удалить базу данных:
+
+```bash
+docker compose down -v
 docker compose down
 ```
 
@@ -253,12 +311,17 @@ DATABASE_URL=mysql+aiomysql://dogwalker:secret123@mysql:3306/dogwalker
 #### Как узнать Telegram ID
 
 Напишите [@userinfobot](https://t.me/userinfobot) — бот ответит вашим числовым ID.
+Напишите [@userinfobot](https://t.me/userinfobot) — бот ответит вашим числовым ID.
 
 ### Как это работает
 
 1. `/start` — выберите язык
 2. Нажмите **Выгулять собаку** — начинается прогулка с 5-минутным таймером
+1. `/start` — выберите язык
+2. Нажмите **Выгулять собаку** — начинается прогулка с 5-минутным таймером
 3. При желании отметьте **Не покакал** / **Долгая прогулка**
+4. Нажмите **Отправить** (или подождите автоотправку) — прогулка записана
+5. Для прошедшей прогулки — **Прогулка в указанное время**, введите время
 4. Нажмите **Отправить** (или подождите автоотправку) — прогулка записана
 5. Для прошедшей прогулки — **Прогулка в указанное время**, введите время
 

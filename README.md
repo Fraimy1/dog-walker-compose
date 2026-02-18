@@ -25,8 +25,8 @@ A private Telegram bot for a small group to log and track dog walks. When someon
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  Docker Compose                      │
-│                                                      │
+│                  Docker Compose                     │
+│                                                     │
 │  ┌──────────┐    ┌──────────┐    ┌───────────────┐  │
 │  │   bot    │    │   web    │    │     mysql     │  │
 │  │          │    │          │    │               │  │
@@ -34,14 +34,14 @@ A private Telegram bot for a small group to log and track dog walks. When someon
 │  │ Telegram │    │ Uvicorn  │    │  persistent   │  │
 │  │ polling  │    │ :8000    │    │  volume       │  │
 │  └────┬─────┘    └────┬─────┘    └──────┬────────┘  │
-│       │               │                 │            │
-│       └───────────────┴─────────────────┘            │
-│                   backend network                    │
-│                                                      │
-│  ┌──────────┐  (dev profile only)                    │
-│  │ adminer  │─────────────────────────────────────── │
-│  │  :8080   │  MySQL web UI                          │
-│  └──────────┘                                        │
+│       │               │                 │           │
+│       └───────────────┴─────────────────┘           │
+│                   backend network                   │
+│                                                     │
+│  ┌──────────┐  (dev profile only)                   │
+│  │ adminer  │───────────────────────────────────────│
+│  │  :8080   │  MySQL web UI                         │
+│  └──────────┘                                       │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -93,15 +93,15 @@ docker compose down -v
 
 Copy `.env.example` to `.env` and fill in the values:
 
-| Variable | Required | Description |
-|---|---|---|
-| `BOT_TOKEN` | Yes | Telegram bot token from [@BotFather](https://t.me/BotFather) |
-| `ALLOWED_USERS` | No | Comma-separated Telegram user IDs to whitelist (empty = allow all) |
-| `MYSQL_USER` | Yes | MySQL username |
-| `MYSQL_PASSWORD` | Yes | MySQL password |
-| `MYSQL_ROOT_PASSWORD` | Yes | MySQL root password |
-| `MYSQL_DATABASE` | Yes | MySQL database name |
-| `DATABASE_URL` | Yes | Full connection string — must match the MySQL credentials above |
+| Variable              | Required | Description                                                        |
+| --------------------- | -------- | ------------------------------------------------------------------ |
+| `BOT_TOKEN`           | Yes      | Telegram bot token from [@BotFather](https://t.me/BotFather)       |
+| `ALLOWED_USERS`       | No       | Comma-separated Telegram user IDs to whitelist (empty = allow all) |
+| `MYSQL_USER`          | Yes      | MySQL username                                                     |
+| `MYSQL_PASSWORD`      | Yes      | MySQL password                                                     |
+| `MYSQL_ROOT_PASSWORD` | Yes      | MySQL root password                                                |
+| `MYSQL_DATABASE`      | Yes      | MySQL database name                                                |
+| `DATABASE_URL`        | Yes      | Full connection string — must match the MySQL credentials above    |
 
 **Example `.env`:**
 ```env
@@ -128,16 +128,16 @@ Message [@userinfobot](https://t.me/userinfobot) on Telegram — it replies with
 
 ### Tech Stack
 
-| Component | Technology |
-|---|---|
-| Bot framework | Python 3.12 / AIogram 3.x |
-| Web framework | FastAPI + Uvicorn |
-| Database | MySQL 8.0 (via SQLAlchemy 2.0 async + aiomysql) |
-| Migrations | Alembic |
-| Scheduling | APScheduler 4.0 |
-| Logging | Loguru |
-| Config | Pydantic Settings |
-| Containerization | Docker + Docker Compose |
+| Component        | Technology                                      |
+| ---------------- | ----------------------------------------------- |
+| Bot framework    | Python 3.12 / AIogram 3.x                       |
+| Web framework    | FastAPI + Uvicorn                               |
+| Database         | MySQL 8.0 (via SQLAlchemy 2.0 async + aiomysql) |
+| Migrations       | Alembic                                         |
+| Scheduling       | APScheduler 4.0                                 |
+| Logging          | Loguru                                          |
+| Config           | Pydantic Settings                               |
+| Containerization | Docker + Docker Compose                         |
 
 ---
 
@@ -161,8 +161,8 @@ Message [@userinfobot](https://t.me/userinfobot) on Telegram — it replies with
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  Docker Compose                      │
-│                                                      │
+│                  Docker Compose                     │
+│                                                     │
 │  ┌──────────┐    ┌──────────┐    ┌───────────────┐  │
 │  │   bot    │    │   web    │    │     mysql     │  │
 │  │          │    │          │    │               │  │
@@ -170,14 +170,14 @@ Message [@userinfobot](https://t.me/userinfobot) on Telegram — it replies with
 │  │ Telegram │    │ Uvicorn  │    │  том для      │  │
 │  │ polling  │    │ :8000    │    │  хранения     │  │
 │  └────┬─────┘    └────┬─────┘    └──────┬────────┘  │
-│       │               │                 │            │
-│       └───────────────┴─────────────────┘            │
-│                  сеть backend                        │
-│                                                      │
-│  ┌──────────┐  (только профиль dev)                  │
-│  │ adminer  │                                        │
-│  │  :8080   │  Веб-интерфейс для MySQL               │
-│  └──────────┘                                        │
+│       │               │                 │           │
+│       └───────────────┴─────────────────┘           │
+│                  сеть backend                       │
+│                                                     │
+│  ┌──────────┐  (только профиль dev)                 │
+│  │ adminer  │                                       │
+│  │  :8080   │  Веб-интерфейс для MySQL              │
+│  └──────────┘                                       │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -229,15 +229,15 @@ docker compose down -v
 
 Скопируйте `.env.example` в `.env` и заполните значения:
 
-| Переменная | Обязательна | Описание |
-|---|---|---|
-| `BOT_TOKEN` | Да | Токен бота от [@BotFather](https://t.me/BotFather) |
-| `ALLOWED_USERS` | Нет | Telegram ID через запятую (пусто = все допущены) |
-| `MYSQL_USER` | Да | Пользователь MySQL |
-| `MYSQL_PASSWORD` | Да | Пароль MySQL |
-| `MYSQL_ROOT_PASSWORD` | Да | Root-пароль MySQL |
-| `MYSQL_DATABASE` | Да | Имя базы данных |
-| `DATABASE_URL` | Да | Строка подключения (должна совпадать с MySQL-данными выше) |
+| Переменная            | Обязательна | Описание                                                   |
+| --------------------- | ----------- | ---------------------------------------------------------- |
+| `BOT_TOKEN`           | Да          | Токен бота от [@BotFather](https://t.me/BotFather)         |
+| `ALLOWED_USERS`       | Нет         | Telegram ID через запятую (пусто = все допущены)           |
+| `MYSQL_USER`          | Да          | Пользователь MySQL                                         |
+| `MYSQL_PASSWORD`      | Да          | Пароль MySQL                                               |
+| `MYSQL_ROOT_PASSWORD` | Да          | Root-пароль MySQL                                          |
+| `MYSQL_DATABASE`      | Да          | Имя базы данных                                            |
+| `DATABASE_URL`        | Да          | Строка подключения (должна совпадать с MySQL-данными выше) |
 
 **Пример `.env`:**
 ```env
@@ -264,13 +264,13 @@ DATABASE_URL=mysql+aiomysql://dogwalker:secret123@mysql:3306/dogwalker
 
 ### Технологии
 
-| Компонент | Технология |
-|---|---|
-| Бот | Python 3.12 / AIogram 3.x |
-| Веб | FastAPI + Uvicorn |
-| База данных | MySQL 8.0 (SQLAlchemy 2.0 async + aiomysql) |
-| Миграции | Alembic |
-| Планировщик | APScheduler 4.0 |
-| Логирование | Loguru |
-| Конфигурация | Pydantic Settings |
-| Контейнеризация | Docker + Docker Compose |
+| Компонент       | Технология                                  |
+| --------------- | ------------------------------------------- |
+| Бот             | Python 3.12 / AIogram 3.x                   |
+| Веб             | FastAPI + Uvicorn                           |
+| База данных     | MySQL 8.0 (SQLAlchemy 2.0 async + aiomysql) |
+| Миграции        | Alembic                                     |
+| Планировщик     | APScheduler 4.0                             |
+| Логирование     | Loguru                                      |
+| Конфигурация    | Pydantic Settings                           |
+| Контейнеризация | Docker + Docker Compose                     |

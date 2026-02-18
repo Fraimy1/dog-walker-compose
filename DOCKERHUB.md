@@ -44,11 +44,11 @@ volumes:
 
 ### Environment Variables
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `BOT_TOKEN` | Yes | -- | Telegram bot token from [@BotFather](https://t.me/BotFather) |
-| `ALLOWED_USERS` | No | `[]` (allow all) | JSON list of Telegram user IDs to whitelist |
-| `DATABASE_URL` | No | `sqlite+aiosqlite:///data/dog_walker.db` | Database connection string |
+| Variable        | Required | Default                                  | Description                                                  |
+| --------------- | -------- | ---------------------------------------- | ------------------------------------------------------------ |
+| `BOT_TOKEN`     | Yes      | --                                       | Telegram bot token from [@BotFather](https://t.me/BotFather) |
+| `ALLOWED_USERS` | No       | `[]` (allow all)                         | JSON list of Telegram user IDs to whitelist                  |
+| `DATABASE_URL`  | No       | `sqlite+aiosqlite:///data/dog_walker.db` | Database connection string                                   |
 
 ### Data Persistence
 
@@ -112,11 +112,11 @@ volumes:
 
 ### Переменные окружения
 
-| Переменная | Обязательна | По умолчанию | Описание |
-|---|---|---|---|
-| `BOT_TOKEN` | Да | -- | Токен Telegram-бота от [@BotFather](https://t.me/BotFather) |
-| `ALLOWED_USERS` | Нет | `[]` (все допущены) | JSON-список Telegram ID пользователей для белого списка |
-| `DATABASE_URL` | Нет | `sqlite+aiosqlite:///data/dog_walker.db` | Строка подключения к базе данных |
+| Переменная      | Обязательна | По умолчанию                             | Описание                                                    |
+| --------------- | ----------- | ---------------------------------------- | ----------------------------------------------------------- |
+| `BOT_TOKEN`     | Да          | --                                       | Токен Telegram-бота от [@BotFather](https://t.me/BotFather) |
+| `ALLOWED_USERS` | Нет         | `[]` (все допущены)                      | JSON-список Telegram ID пользователей для белого списка     |
+| `DATABASE_URL`  | Нет         | `sqlite+aiosqlite:///data/dog_walker.db` | Строка подключения к базе данных                            |
 
 ### Хранение данных
 

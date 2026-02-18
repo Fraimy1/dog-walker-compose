@@ -8,8 +8,11 @@ services:
       - ALLOWED_USERS=${ALLOWED_USERS}
       - TZ=Europe/Moscow
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - backend
 
   web:
     build: { dockerfile: Dockerfile.web }
@@ -20,7 +23,11 @@ services:
     ports:
       - "0.0.0.0:8000:8000"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
 
   mysql:
     image: mysql:8.0
@@ -32,6 +39,34 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - backend
+
+  # ── Dev profile only ──────────────────────────────────────────────────────
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    profiles:
+      - dev
+    networks:
+      - backend
+      - frontend
 
 volumes:
   mysql-data:
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge

@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from aiogram import Bot, F, Router
 from aiogram.filters import Command, StateFilter
@@ -8,6 +9,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
+from src.bot.config import settings
 from src.bot.i18n import TEXTS, get_text
 from src.bot.keyboards import ask_walk_keyboard, language_keyboard, main_keyboard, parameter_keyboard
 from src.bot.notifications import broadcast_walk
@@ -360,8 +362,11 @@ async def handle_time_input(message: Message, state: FSMContext) -> None:
         await schedule_walk_finalization(user.id, walk.id)
 
         # Build confirmation — append "(yesterday)" when date differs
-        time_str = parsed.strftime("%H:%M")
-        if parsed.date() < datetime.now(timezone.utc).date():
+        # parsed is naive UTC; convert to local time for display
+        tz = ZoneInfo(settings.display_timezone)
+        local_time = parsed.replace(tzinfo=timezone.utc).astimezone(tz)
+        time_str = local_time.strftime("%H:%M")
+        if local_time.date() < datetime.now(tz).date():
             time_str += f" ({get_text('yesterday', lang)})"
 
         await message.answer(

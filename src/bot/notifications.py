@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from aiogram import Bot
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.bot.config import settings
 from src.bot.i18n import get_text
 from src.database import crud
 
@@ -18,9 +20,10 @@ async def broadcast_walk(session: AsyncSession, walk, walker_user, bot: Bot) -> 
     logger.info(f"Broadcasting walk {walk.id} to {len(all_users)} users")
 
     username = walker_user.display_name or walker_user.username or f"User {walker_user.telegram_id}"
-    now = datetime.now(timezone.utc)
+    tz = ZoneInfo(settings.display_timezone)
+    now = datetime.now(timezone.utc).astimezone(tz)
     time_now = now.strftime("%H:%M")
-    time_walked = walk.walked_at.strftime("%H:%M")
+    time_walked = walk.walked_at.replace(tzinfo=timezone.utc).astimezone(tz).strftime("%H:%M")
 
     for user in all_users:
         message = get_text("walk_logged", user.language).format(
